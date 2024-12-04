@@ -1,0 +1,37 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Task {
+  task_id        Int       @id @default(autoincrement())  // Primary key with auto increment
+  title          String
+  description    String
+  task_status    String 
+  start_date     DateTime
+  end_date       DateTime
+  category_id    Int       // Foreign key for Category relation
+  category       Category  @relation(fields: [category_id], references: [id])
+
+
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+}
+
+
+
+model Category {
+  id     Int     @id @default(autoincrement())
+  name   String
+  tasks  Task[]  // This automatically creates the reverse relation without naming it
+}
