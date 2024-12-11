@@ -1,12 +1,17 @@
 import express from "express";
 import {
-  categoriesController,
-  getCategoriesController,
+  deleteCategories,
+  getCategories,
+  showCategory,
+  postCategories,
+  updateCategories,
 } from "../Controller/categoriesController.js";
 
-const router = express.Router();
+export const categoriesRouter = express.Router();
 
-export const categoriesRouter = () =>{ router
-  .route("/categories")
-  .post(categoriesController)
-  .get(getCategoriesController);}
+categoriesRouter
+  .get("/categories", getCategories)
+  .post("/categories", postCategories)
+  .delete("/categories/:id", deleteCategories)
+  .get("/categories/:id", showCategory)
+  .patch("/categories/:id", updateCategories);

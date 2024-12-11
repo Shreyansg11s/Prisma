@@ -1,76 +1,59 @@
 import express from "express";
-import { PrismaClient } from "@prisma/client";
-import { DateTime } from "luxon";
-import { status } from "http-status";
+import { prisma } from "./prisma.js"; // Import the Prisma client
 import { categoriesRouter } from "./Router/categoriesRouter.js";
-// Assuming you're using Prisma
-// import categoriesRouter from "./Router/categoriesRouter.js"; // Unused in the code, so remove if not necessary
+import { taskRouter } from "./Router/taskRouter.js";
+import { Prisma } from "@prisma/client";
 
-const prisma = new PrismaClient(); // Initialize Prisma client
 const port = 5000;
-
 const app = express();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-// POST route for creating categories
-app.use("/",categoriesRouter);
-
-app
-  .get("/tasks", async (req, res) => {
-    try {
-      const data = await prisma.task.findMany({});
-
-      res.status[status.classes.SUCCESSFUL].json(data);
-    } catch (error) {
-      res.status[status.classes.SERVER_ERROR].json(error.message);
-    }
+prisma
+  .$connect()
+  .then(() => {
+    console.log("Connected to the database successfully!");
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+    });
   })
-  .post("/tasks", async (req, res) => {
-    const {
-      title,
-      description,
-      task_status,
-      start_date,
-      end_date,
-      category_id,
-    } = req.body;
-
-    // Ensure the dates are in the correct format (ISO 8601 string or JavaScript Date object)
-    // const startDate = new Date(start_date); // Convert the date string to a JavaScript Date object
-    // const endDate = new Date(end_date);
-    let created_at = DateTime.now(); // Convert the date string to a JavaScript Date object
-
-    try {
-      // Create the task
-      const taskCreated = await prisma.task.create({
-        data: {
-          title: title,
-          description: description,
-          task_status: task_status, // Assuming task_status is a string and you map it to your Status model
-          start_date: new Date(start_date), // Use the JavaScript Date object
-          end_date: new Date(end_date), // Use the JavaScript Date object
-          category_id: category_id, // Assuming category_id is a valid foreign key
-          created_at: created_at, // Automatically set created_at to the current date and time
-          // Automatically set updated_at to the current date and time
-        },
-      });
-
-      // Respond with the created task
-      res.status[status.classes.SUCCESSFUL].send({
-        status: "OK",
-        data: taskCreated,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status[status.classes.SERVER_ERROR].send({ error: error.message });
-    }
+  .catch((error) => {
+    console.error("Failed to connect to the database:", error);
+    process.exit(1); // Exit the process if the database connection fails
   });
 
-// // Use the categoriesRouter (if it's needed)
-// app.use("/categories", categoriesRouter);
+// app.use((err, req, res, next) => {
+//   if (err.isOperational) {
+//     return res.status(err.statusCode).json({
+//       status: "error",
+//       message: err.message,
+//     });
+//   }
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+//   // If it's a non-operational error (e.g., programming bugs), log it and send a generic response
+//   console.error(err.stack);
+//   res.status(500).json({
+//     status: "error",
+//     message: "Internal Server Error",
+//   });
+// });
+
+app.use("/", categoriesRouter);
+app.use("/", taskRouter);
+app.use("*", (req, res, next) => {
+  res.json("Page not found");
+  next();
+});
+app.use((err, req, res, next) => {
+  // console.error(err.stack); // Log the error stack for debugging
+
+  // Set status code, defaulting to 500 if not provided
+  const statusCode = err.statusCode || 500;
+
+  // Respond with error details
+  res.status(statusCode).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
 });
