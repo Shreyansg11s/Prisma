@@ -36,9 +36,18 @@ export const createTask = async (data) => {
   return result;
 };
 
-export const getTask = async () => {
-  const data = await prisma.task.findMany({});
-  return data;
+export const getTask = async (limit, offset) => {
+  const data = await prisma.task.findMany({
+    take: limit,
+    skip: offset,
+  });
+
+  const total = await prisma.task.count();
+
+  const pages = Math.ceil(total / limit);
+  let currentpage = math.floor(offset / limit + 1);
+  let returned = { total, pages, currentpage, data };
+  return returned;
 };
 
 export const deleteTask = async (id) => {
@@ -81,6 +90,7 @@ export const updateTask = async (id, data) => {
       updated_at: updated_at,
     },
   });
+  // Select title, description, task_status from task
   return task;
 };
 

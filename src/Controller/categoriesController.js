@@ -23,8 +23,9 @@ export const postCategories = async (req, res, next) => {
 
 export const getCategories = async (req, res, next) => {
   try {
-    const data = await getCategory();
-    res.send({ status: "OK", data: data });
+    const { limit, offset } = req.query;
+    const data = await getCategory(Number(limit), Number(offset));
+    res.send({ status: status[200], data: data });
   } catch (err) {
     next(err);
   }
@@ -38,7 +39,7 @@ export const deleteCategories = async (req, res, next) => {
     if (result == null) {
       res.json("No data found");
     }
-    res.send({ status: "OK", data: result });
+    res.send({ status: status[204], data: result });
   } catch (error) {
     next(error);
   }
@@ -46,8 +47,9 @@ export const deleteCategories = async (req, res, next) => {
 
 export const updateCategories = async (req, res, next) => {
   try {
+    //check if id exists if not throw error
     const result = await updateCategory(req.params.id, req.body);
-    res.json({ status: "OK", data: result });
+    res.json({ status: status[201], data: result });
   } catch (error) {
     next(error);
   }
@@ -55,12 +57,13 @@ export const updateCategories = async (req, res, next) => {
 
 export const showCategory = async (req, res, next) => {
   try {
+    //validation for id
     const result = await getCategoryById(req.params.id);
     if (result == null) {
       res.json("Data not found");
       return;
     }
-    res.json({ status: "OK", data: result });
+    res.json({ status: status[200], data: result });
   } catch (error) {
     next(error);
   }

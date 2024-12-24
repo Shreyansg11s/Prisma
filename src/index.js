@@ -53,7 +53,7 @@ app.use((err, req, res, next) => {
 
   // Respond with error details
   res.status(statusCode).json({
-    success: false,
+    success: "False",
     message: err.message || "Internal Server Error",
   });
 });

@@ -28,9 +28,17 @@ export const createCategory = async (data) => {
   return result;
 };
 
-export const getCategory = async () => {
-  const data = await prisma.category.findMany({});
-  return data;
+export const getCategory = async (limit, offset) => {
+  const data = await prisma.category.findMany({
+    take: limit,
+    skip: offset,
+  });
+  const total = await prisma.category.count();
+
+  const pages = Math.ceil(total / limit);
+  let currentpage = Math.floor(offset / limit + 1);
+  let returned = { total, pages, currentpage, data };
+  return returned;
 };
 
 export const deleteCategory = async (id) => {
@@ -41,7 +49,7 @@ export const deleteCategory = async (id) => {
   });
 
   if (!task) {
-    console.log("error");
+    console.log("error"); // throw error with status code and message and handle response in global error handler
     return;
   }
 

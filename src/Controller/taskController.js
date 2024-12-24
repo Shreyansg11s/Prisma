@@ -22,9 +22,17 @@ export const postTaskController = async (req, res, next) => {
 
 export const getTaskController = async (req, res, next) => {
   try {
-    const data = await getTask();
+    const { limit, offset } = req.query;
 
-    res.send({ status: "OK", data: data });
+    const data = await getTask(Number(limit), Number(offset));
+
+    res.send({
+      status: status[200],
+      data: data,
+      // page: page,
+      // totalpages: totalpages,
+      // totalData: totalData,
+    });
   } catch (error) {
     res.status(500);
   }
@@ -37,7 +45,7 @@ export const deleteTaskController = async (req, res, next) => {
     const result = await deleteTask(Number(id));
 
     res.json({
-      success: true,
+      status: status[204],
       message: result,
     });
   } catch (error) {
@@ -46,14 +54,13 @@ export const deleteTaskController = async (req, res, next) => {
 };
 
 export const getTaskByIdController = async (req, res, next) => {
-  console.log("here");
   try {
     const result = await getTaskById(req.params.id);
     if (result == null) {
       res.json("No data found");
       return;
     }
-    res.send(result);
+    res.json({ status: status[200], data: result });
   } catch (error) {
     next(error);
   }
@@ -67,7 +74,7 @@ export const updateTaskByIdController = async (req, res, next) => {
     const result = await updateTask(id, data);
     console.log("here1");
 
-    res.json(result);
+    res.json({ status: status[200], data: result });
   } catch (err) {
     next(err);
   }
