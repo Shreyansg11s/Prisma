@@ -10,12 +10,12 @@ import { status } from "http-status";
 export const postCategories = async (req, res, next) => {
   // console.log("hereee");
   const data = req.body;
+  // console.log(data);
 
   try {
     const category = await createCategory(data);
-    console.log(category, "data");
 
-    res.send({ status: status.CREATED, data: category });
+    res.send({ statusCode: 201, status: status[201], data: category });
   } catch (error) {
     next(error);
   }
@@ -25,7 +25,7 @@ export const getCategories = async (req, res, next) => {
   try {
     const { limit, offset } = req.query;
     const data = await getCategory(Number(limit), Number(offset));
-    res.send({ status: status[200], data: data });
+    res.send({ statusCode: 200, status: status[200], data: data });
   } catch (err) {
     next(err);
   }
@@ -39,7 +39,7 @@ export const deleteCategories = async (req, res, next) => {
     if (result == null) {
       res.json("No data found");
     }
-    res.send({ status: status[204], data: result });
+    res.send({ statusCode: 200, status: status[200], data: result });
   } catch (error) {
     next(error);
   }
@@ -49,7 +49,7 @@ export const updateCategories = async (req, res, next) => {
   try {
     //check if id exists if not throw error
     const result = await updateCategory(req.params.id, req.body);
-    res.json({ status: status[201], data: result });
+    res.json({ statusCode: 201, status: status[201], data: result });
   } catch (error) {
     next(error);
   }
@@ -60,10 +60,14 @@ export const showCategory = async (req, res, next) => {
     //validation for id
     const result = await getCategoryById(req.params.id);
     if (result == null) {
-      res.json("Data not found");
+      res.json({
+        statusCode: 404,
+        status: status[404],
+        message: "Data not found",
+      });
       return;
     }
-    res.json({ status: status[200], data: result });
+    res.json({ statusCode: 200, status: status[200], data: result });
   } catch (error) {
     next(error);
   }

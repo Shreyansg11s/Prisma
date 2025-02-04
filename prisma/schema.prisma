@@ -13,19 +13,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Status {
+  pending
+  completed
+  on_going
+}
+
+model User{
+  user_id Int @id @default(autoincrement())
+  username String @unique
+  email String @unique
+  age Int
+  phone_number String
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt @default(now())
+  password String
+  Task Task[]
+
+}
+
 model Task {
   task_id        Int       @id @default(autoincrement())  // Primary key with auto increment
   title          String
   description    String
-  task_status    String 
+  task_status    Status @default(pending) 
   start_date     DateTime
   end_date       DateTime
-  category_id    Int       // Foreign key for Category relation
   category       Category  @relation(fields: [category_id], references: [id])
-
-
+  category_id    Int       // Foreign key for Category relation
   created_at     DateTime  @default(now())
   updated_at     DateTime  @updatedAt @default(now())
+  User User @relation(fields: [user_id], references:[user_id])
+  user_id Int
 }
 
 
